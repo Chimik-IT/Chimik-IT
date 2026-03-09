@@ -8,7 +8,7 @@ Since 2022 also building with it — RAG pipelines, LLM integration, AI tooling.
 - RAG systems and LLM-based tooling in Python
 - Bridging Ops reliability and AI capability
 
-**Contribution:** Code and tooling for a RAG pipeline used in soft tissue sarcoma diagnostics,
+**Contribution:** Code and tooling for [RAG-for-LLM4Tumor](https://github.com/youngtree1/RAG-for-LLM4Tumor) — a RAG pipeline used in soft tissue sarcoma diagnostics,
 published in *Oncology Research and Treatment* (Feb 2025).
 
 *Common Lisper by conviction.*
