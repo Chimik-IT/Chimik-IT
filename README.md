@@ -1,4 +1,4 @@
-## Tobias Yang
+## Tobias Yang (楊濤比)
 
 15 years running Linux in production.
 Since 2022 also building with it — RAG pipelines, LLM integration, AI tooling.
