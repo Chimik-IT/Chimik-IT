@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2026-08-30 So. 15:17 -->
+<!-- 2026-08-30 So. 15:29 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Homebrew without root — and getting the PATH right</title>
+<title>Homebrew without admin — and getting the PATH right</title>
 <meta name="author" content="Tobias Speer" />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
@@ -200,83 +200,77 @@
 <nav class="howto-nav"><a href="index.html">Chimik-IT</a> — How-Tos</nav>
 </div>
 <div id="content" class="content">
-<h1 class="title">Homebrew without root — and getting the PATH right</h1>
+<h1 class="title">Homebrew without admin — and getting the PATH right</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org0049408">The problem</a></li>
-<li><a href="#orgd43822f">Installing into your own prefix</a></li>
-<li><a href="#orgb6e183c">Wiring up the environment</a></li>
-<li><a href="#org8f076db">The catch: no bundled toolchain</a></li>
-<li><a href="#org5c7f6ca">PATH ordering — be deliberate</a></li>
-<li><a href="#org6843aa4">Why this is worth doing</a></li>
+<li><a href="#org144024e">The problem</a></li>
+<li><a href="#orgf9cca34">Installing into your own prefix</a></li>
+<li><a href="#orgf7b4edc">Wiring up the environment</a></li>
+<li><a href="#orgcb8888c">The catch: you lose most prebuilt bottles</a></li>
+<li><a href="#org6b7cd8f">PATH ordering — be deliberate</a></li>
+<li><a href="#org12c0906">Why this is worth doing</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org0049408" class="outline-2">
-<h2 id="org0049408">The problem</h2>
-<div class="outline-text-2" id="text-org0049408">
+<div id="outline-container-org144024e" class="outline-2">
+<h2 id="org144024e">The problem</h2>
+<div class="outline-text-2" id="text-org144024e">
 <p>
-Managed Linux boxes — corporate laptops, hardened servers, anything you
-don't have <code>sudo</code> on — still leave you wanting a real package manager for
-dev tooling. The official Homebrew installer wants root (it writes to
-<code>/home/linuxbrew/.linuxbrew</code> by default and calls <code>sudo</code> along the way).
-That's a non-starter on a locked-down host. The good news: Homebrew is
-just files. You can put the whole thing anywhere your user can write.
+Corporate-managed MacBooks — MDM-enrolled, no local admin, IT owns
+<code>sudo</code> — still leave you wanting a real package manager for dev tooling.
+The official Homebrew installer needs admin rights: it creates
+<code>/opt/homebrew</code> (Apple Silicon) or <code>/usr/local</code> (Intel) and <code>chown~s it
+to you via ~sudo</code>. On a locked-down corporate box that fails at the very
+first step. The good news: Homebrew is just files. You can put the whole
+thing anywhere your own account can write — no admin required.
 </p>
 </div>
 </div>
-<div id="outline-container-orgd43822f" class="outline-2">
-<h2 id="orgd43822f">Installing into your own prefix</h2>
-<div class="outline-text-2" id="text-orgd43822f">
+<div id="outline-container-orgf9cca34" class="outline-2">
+<h2 id="orgf9cca34">Installing into your own prefix</h2>
+<div class="outline-text-2" id="text-orgf9cca34">
 <p>
-No root, no installer script — just clone it:
+No installer script, no root — just clone it into somewhere under your
+home directory:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash">mkdir -p ~/.linuxbrew
-git clone https://github.com/Homebrew/brew ~/.linuxbrew/Homebrew
-mkdir -p ~/.linuxbrew/bin
-ln -s ~/.linuxbrew/Homebrew/bin/brew ~/.linuxbrew/bin/brew
+<pre class="src src-bash">git clone https://github.com/Homebrew/brew ~/homebrew
 </pre>
 </div>
 
 <p>
-That's the entire install. Nothing touched outside your home directory.
+That's the entire install. Nothing touched outside your home directory,
+nothing that needs IT approval.
 </p>
 </div>
 </div>
-<div id="outline-container-orgb6e183c" class="outline-2">
-<h2 id="orgb6e183c">Wiring up the environment</h2>
-<div class="outline-text-2" id="text-orgb6e183c">
+<div id="outline-container-orgf7b4edc" class="outline-2">
+<h2 id="orgf7b4edc">Wiring up the environment</h2>
+<div class="outline-text-2" id="text-orgf7b4edc">
 <p>
 Homebrew ships a helper that prints the exact environment it needs —
 don't hand-roll this:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash">~/.linuxbrew/bin/brew shellenv
+<pre class="src src-bash">~/homebrew/bin/brew shellenv
 </pre>
 </div>
 
 <p>
 It sets more than just <code>PATH</code>: <code>MANPATH</code>, <code>INFOPATH</code>,
 <code>HOMEBREW_PREFIX</code>, <code>HOMEBREW_CELLAR</code>, <code>HOMEBREW_REPOSITORY</code>. Eval it in
-your shell and persist it:
+your shell and persist it — macOS defaults to zsh since Catalina:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash">echo 'eval "$(~/.linuxbrew/bin/brew shellenv)"' &gt;&gt; ~/.bashrc
-source ~/.bashrc
+<pre class="src src-bash">echo 'eval "$(~/homebrew/bin/brew shellenv)"' &gt;&gt; ~/.zprofile
+source ~/.zprofile
 </pre>
 </div>
-
-<p>
-(<code>~/.profile</code> or <code>~/.zshrc</code> instead, depending on your shell — the point
-is: whichever file actually gets sourced for your login shell on that
-host.)
-</p>
 
 <p>
 Verify:
@@ -285,48 +279,57 @@ Verify:
 <div class="org-src-container">
 <pre class="src src-bash">which brew
 brew --prefix
-# ~/.linuxbrew
+# /Users/you/homebrew
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org8f076db" class="outline-2">
-<h2 id="org8f076db">The catch: no bundled toolchain</h2>
-<div class="outline-text-2" id="text-org8f076db">
+<div id="outline-container-orgcb8888c" class="outline-2">
+<h2 id="orgcb8888c">The catch: you lose most prebuilt bottles</h2>
+<div class="outline-text-2" id="text-orgcb8888c">
 <p>
-On macOS, Homebrew formulae mostly ship as bottles (prebuilt binaries).
-On Linux, plenty still need to compile, and Homebrew doesn't bring its
-own compiler the way it half-does on macOS via Xcode CLT. Run
-<code>brew doctor</code> right after install — it'll tell you if =gcc=/=make=/glibc
-headers are missing. If the box has no root at all and no build-essential
-equivalent preinstalled, you're limited to formulae that ship prebuilt
-bottles for your platform. Check before you plan a whole toolchain around
-it.
+Homebrew's precompiled binaries ("bottles") are built assuming the
+default prefix (<code>/opt/homebrew</code> or <code>/usr/local</code>). Install into
+<code>~/homebrew</code> instead and most formulae won't have a matching bottle —
+<code>brew</code> falls back to compiling from source. That means you actually need
+Xcode Command Line Tools:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">xcode-select --install
+</pre>
+</div>
+
+<p>
+On a corporate box this may itself need admin, or may already be
+provisioned through the MDM's self-service catalog — worth checking
+before you assume the whole approach is blocked. Some IT departments
+push CLT by default precisely because so much tooling depends on it.
 </p>
 </div>
 </div>
-<div id="outline-container-org5c7f6ca" class="outline-2">
-<h2 id="org5c7f6ca">PATH ordering — be deliberate</h2>
-<div class="outline-text-2" id="text-org5c7f6ca">
+<div id="outline-container-org6b7cd8f" class="outline-2">
+<h2 id="org6b7cd8f">PATH ordering — be deliberate</h2>
+<div class="outline-text-2" id="text-org6b7cd8f">
 <p>
-<code>brew shellenv</code> prepends its prefix to <code>PATH</code>, meaning Homebrew binaries
-shadow system ones with the same name. Usually what you want for dev
-tools (newer git, newer python). Usually <b>not</b> what you want for anything
-security-sensitive — <code>ssh</code>, <code>sudo</code>, <code>su</code> should stay resolving to the
-system binary. Homebrew doesn't install replacements for those, but it's
-worth checking <code>which</code> for anything you're unsure about after adding the
-eval line, rather than assuming.
+<code>brew shellenv</code> prepends its prefix to <code>PATH</code>, so Homebrew binaries
+shadow system ones with the same name — usually what you want for dev
+tools (newer git, newer python). Be careful if your company wraps
+anything for compliance — e.g. a corporate <code>git</code> wrapper that adds
+logging or credential injection. Check <code>which git</code> (and anything else
+you're unsure about) after adding the eval line, rather than assuming
+you're still calling the wrapped version.
 </p>
 </div>
 </div>
-<div id="outline-container-org6843aa4" class="outline-2">
-<h2 id="org6843aa4">Why this is worth doing</h2>
-<div class="outline-text-2" id="text-org6843aa4">
+<div id="outline-container-org12c0906" class="outline-2">
+<h2 id="org12c0906">Why this is worth doing</h2>
+<div class="outline-text-2" id="text-org12c0906">
 <p>
 Same motivation as the GPG/pass setup: one lightweight mechanism, no
-root, no server, no vendor tie-in — just files under your own home
-directory that you can tar up, move to the next machine, or delete
-without asking anyone's permission.
+admin rights needed, no server, no vendor tie-in — just files under your
+own home directory that you can tar up, move to the next machine, or
+delete without filing a ticket.
 </p>
 </div>
 </div>

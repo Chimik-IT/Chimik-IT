@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2026-08-30 So. 15:17 -->
+<!-- 2026-08-30 So. 15:29 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>What a GPG key is actually good for</title>
@@ -205,17 +205,17 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgd13e5ea">Why bother with GPG at all</a></li>
-<li><a href="#orgc6dbbe2">Generating a key</a></li>
-<li><a href="#org5208672">Using it with <code>pass</code></a></li>
-<li><a href="#org2ef5c51">Using it for commit signing</a></li>
-<li><a href="#org20ff5b6">Why one key for both</a></li>
+<li><a href="#org0842d28">Why bother with GPG at all</a></li>
+<li><a href="#org1b88446">Generating a key</a></li>
+<li><a href="#org69d5e90">Using it with <code>pass</code></a></li>
+<li><a href="#org09b6046">Using it for commit signing</a></li>
+<li><a href="#orgc01c16b">Why one key for both</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd13e5ea" class="outline-2">
-<h2 id="orgd13e5ea">Why bother with GPG at all</h2>
-<div class="outline-text-2" id="text-orgd13e5ea">
+<div id="outline-container-org0842d28" class="outline-2">
+<h2 id="org0842d28">Why bother with GPG at all</h2>
+<div class="outline-text-2" id="text-org0842d28">
 <p>
 Most people meet GPG once, to encrypt an email nobody else encrypts either,
 and never touch it again. That undersells it badly. A single GPG keypair
@@ -225,9 +225,9 @@ proves authorship.
 </p>
 </div>
 </div>
-<div id="outline-container-orgc6dbbe2" class="outline-2">
-<h2 id="orgc6dbbe2">Generating a key</h2>
-<div class="outline-text-2" id="text-orgc6dbbe2">
+<div id="outline-container-org1b88446" class="outline-2">
+<h2 id="org1b88446">Generating a key</h2>
+<div class="outline-text-2" id="text-org1b88446">
 <div class="org-src-container">
 <pre class="src src-bash">gpg --full-generate-key
 </pre>
@@ -249,9 +249,9 @@ List it:
 </div>
 </div>
 </div>
-<div id="outline-container-org5208672" class="outline-2">
-<h2 id="org5208672">Using it with <code>pass</code></h2>
-<div class="outline-text-2" id="text-org5208672">
+<div id="outline-container-org69d5e90" class="outline-2">
+<h2 id="org69d5e90">Using it with <code>pass</code></h2>
+<div class="outline-text-2" id="text-org69d5e90">
 <p>
 <a href="https://www.passwordstore.org/">pass</a> is "the standard unix password
 manager" — a thin wrapper around GPG-encrypted text files, versioned with
@@ -273,9 +273,9 @@ you'd sync any other git repo.
 </p>
 </div>
 </div>
-<div id="outline-container-org2ef5c51" class="outline-2">
-<h2 id="org2ef5c51">Using it for commit signing</h2>
-<div class="outline-text-2" id="text-org2ef5c51">
+<div id="outline-container-org09b6046" class="outline-2">
+<h2 id="org09b6046">Using it for commit signing</h2>
+<div class="outline-text-2" id="text-org09b6046">
 <p>
 Same key, different purpose: proving that a commit actually came from you,
 not from someone who pushed under your name.
@@ -308,9 +308,9 @@ the platform (Settings → GPG Keys). Export it with:
 </div>
 </div>
 </div>
-<div id="outline-container-org20ff5b6" class="outline-2">
-<h2 id="org20ff5b6">Why one key for both</h2>
-<div class="outline-text-2" id="text-org20ff5b6">
+<div id="outline-container-orgc01c16b" class="outline-2">
+<h2 id="orgc01c16b">Why one key for both</h2>
+<div class="outline-text-2" id="text-orgc01c16b">
 <p>
 It's not strictly necessary — you could keep a dedicated signing key and
 a dedicated encryption key. But for a personal setup, one identity that
