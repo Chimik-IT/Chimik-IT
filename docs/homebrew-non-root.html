@@ -6,7 +6,7 @@
 <!-- 2026-08-30 So. 15:17 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>What a GPG key is actually good for</title>
+<title>Homebrew without root — and getting the PATH right</title>
 <meta name="author" content="Tobias Speer" />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
@@ -200,123 +200,133 @@
 <nav class="howto-nav"><a href="index.html">Chimik-IT</a> — How-Tos</nav>
 </div>
 <div id="content" class="content">
-<h1 class="title">What a GPG key is actually good for</h1>
+<h1 class="title">Homebrew without root — and getting the PATH right</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgd13e5ea">Why bother with GPG at all</a></li>
-<li><a href="#orgc6dbbe2">Generating a key</a></li>
-<li><a href="#org5208672">Using it with <code>pass</code></a></li>
-<li><a href="#org2ef5c51">Using it for commit signing</a></li>
-<li><a href="#org20ff5b6">Why one key for both</a></li>
+<li><a href="#org0049408">The problem</a></li>
+<li><a href="#orgd43822f">Installing into your own prefix</a></li>
+<li><a href="#orgb6e183c">Wiring up the environment</a></li>
+<li><a href="#org8f076db">The catch: no bundled toolchain</a></li>
+<li><a href="#org5c7f6ca">PATH ordering — be deliberate</a></li>
+<li><a href="#org6843aa4">Why this is worth doing</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd13e5ea" class="outline-2">
-<h2 id="orgd13e5ea">Why bother with GPG at all</h2>
-<div class="outline-text-2" id="text-orgd13e5ea">
+<div id="outline-container-org0049408" class="outline-2">
+<h2 id="org0049408">The problem</h2>
+<div class="outline-text-2" id="text-org0049408">
 <p>
-Most people meet GPG once, to encrypt an email nobody else encrypts either,
-and never touch it again. That undersells it badly. A single GPG keypair
-backs two tools I use daily: a password manager (<code>pass</code>) and signed Git
-commits. Same key, two very different jobs — one keeps secrets, the other
-proves authorship.
+Managed Linux boxes — corporate laptops, hardened servers, anything you
+don't have <code>sudo</code> on — still leave you wanting a real package manager for
+dev tooling. The official Homebrew installer wants root (it writes to
+<code>/home/linuxbrew/.linuxbrew</code> by default and calls <code>sudo</code> along the way).
+That's a non-starter on a locked-down host. The good news: Homebrew is
+just files. You can put the whole thing anywhere your user can write.
 </p>
 </div>
 </div>
-<div id="outline-container-orgc6dbbe2" class="outline-2">
-<h2 id="orgc6dbbe2">Generating a key</h2>
-<div class="outline-text-2" id="text-orgc6dbbe2">
+<div id="outline-container-orgd43822f" class="outline-2">
+<h2 id="orgd43822f">Installing into your own prefix</h2>
+<div class="outline-text-2" id="text-orgd43822f">
+<p>
+No root, no installer script — just clone it:
+</p>
+
 <div class="org-src-container">
-<pre class="src src-bash">gpg --full-generate-key
+<pre class="src src-bash">mkdir -p ~/.linuxbrew
+git clone https://github.com/Homebrew/brew ~/.linuxbrew/Homebrew
+mkdir -p ~/.linuxbrew/bin
+ln -s ~/.linuxbrew/Homebrew/bin/brew ~/.linuxbrew/bin/brew
 </pre>
 </div>
 
 <p>
-Pick RSA 4096 (or ed25519 if your tooling supports it), a reasonable
-expiry (1-2 years, renewable), and a real name + email — the email is the
-identifier <code>pass</code> and Git will both look up later.
+That's the entire install. Nothing touched outside your home directory.
 </p>
-
+</div>
+</div>
+<div id="outline-container-orgb6e183c" class="outline-2">
+<h2 id="orgb6e183c">Wiring up the environment</h2>
+<div class="outline-text-2" id="text-orgb6e183c">
 <p>
-List it:
+Homebrew ships a helper that prints the exact environment it needs —
+don't hand-roll this:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash">gpg --list-secret-keys --keyid-format long
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-org5208672" class="outline-2">
-<h2 id="org5208672">Using it with <code>pass</code></h2>
-<div class="outline-text-2" id="text-org5208672">
-<p>
-<a href="https://www.passwordstore.org/">pass</a> is "the standard unix password
-manager" — a thin wrapper around GPG-encrypted text files, versioned with
-git. No server, no proprietary format, no vendor lock-in.
-</p>
-
-<div class="org-src-container">
-<pre class="src src-bash">pass init "your-email@example.com"
-pass insert homelab/gitlab-root
-pass show homelab/gitlab-root
+<pre class="src src-bash">~/.linuxbrew/bin/brew shellenv
 </pre>
 </div>
 
 <p>
-Every entry is one file, encrypted to your GPG key. <code>pass show</code> decrypts
-it on the fly — nothing sits in plaintext on disk. Combine it with
-<code>pass git init</code> to sync the encrypted store across machines the same way
-you'd sync any other git repo.
-</p>
-</div>
-</div>
-<div id="outline-container-org2ef5c51" class="outline-2">
-<h2 id="org2ef5c51">Using it for commit signing</h2>
-<div class="outline-text-2" id="text-org2ef5c51">
-<p>
-Same key, different purpose: proving that a commit actually came from you,
-not from someone who pushed under your name.
+It sets more than just <code>PATH</code>: <code>MANPATH</code>, <code>INFOPATH</code>,
+<code>HOMEBREW_PREFIX</code>, <code>HOMEBREW_CELLAR</code>, <code>HOMEBREW_REPOSITORY</code>. Eval it in
+your shell and persist it:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash">git config --global user.signingkey &lt;KEY-ID&gt;
-git config --global commit.gpgsign true
+<pre class="src src-bash">echo 'eval "$(~/.linuxbrew/bin/brew shellenv)"' &gt;&gt; ~/.bashrc
+source ~/.bashrc
 </pre>
 </div>
 
 <p>
-From then on every commit gets signed automatically:
+(<code>~/.profile</code> or <code>~/.zshrc</code> instead, depending on your shell — the point
+is: whichever file actually gets sourced for your login shell on that
+host.)
 </p>
-
-<div class="org-src-container">
-<pre class="src src-bash">git commit -m "some change"
-git log --show-signature -1
-</pre>
-</div>
 
 <p>
-GitHub/GitLab show a "Verified" badge once your public key is uploaded to
-the platform (Settings → GPG Keys). Export it with:
+Verify:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash">gpg --armor --export &lt;KEY-ID&gt;
+<pre class="src src-bash">which brew
+brew --prefix
+# ~/.linuxbrew
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org20ff5b6" class="outline-2">
-<h2 id="org20ff5b6">Why one key for both</h2>
-<div class="outline-text-2" id="text-org20ff5b6">
+<div id="outline-container-org8f076db" class="outline-2">
+<h2 id="org8f076db">The catch: no bundled toolchain</h2>
+<div class="outline-text-2" id="text-org8f076db">
 <p>
-It's not strictly necessary — you could keep a dedicated signing key and
-a dedicated encryption key. But for a personal setup, one identity that
-both proves "this commit is mine" and "only I can read this secret" is
-easier to reason about and easier to back up: one key, one revocation
-certificate, one thing to protect.
+On macOS, Homebrew formulae mostly ship as bottles (prebuilt binaries).
+On Linux, plenty still need to compile, and Homebrew doesn't bring its
+own compiler the way it half-does on macOS via Xcode CLT. Run
+<code>brew doctor</code> right after install — it'll tell you if =gcc=/=make=/glibc
+headers are missing. If the box has no root at all and no build-essential
+equivalent preinstalled, you're limited to formulae that ship prebuilt
+bottles for your platform. Check before you plan a whole toolchain around
+it.
+</p>
+</div>
+</div>
+<div id="outline-container-org5c7f6ca" class="outline-2">
+<h2 id="org5c7f6ca">PATH ordering — be deliberate</h2>
+<div class="outline-text-2" id="text-org5c7f6ca">
+<p>
+<code>brew shellenv</code> prepends its prefix to <code>PATH</code>, meaning Homebrew binaries
+shadow system ones with the same name. Usually what you want for dev
+tools (newer git, newer python). Usually <b>not</b> what you want for anything
+security-sensitive — <code>ssh</code>, <code>sudo</code>, <code>su</code> should stay resolving to the
+system binary. Homebrew doesn't install replacements for those, but it's
+worth checking <code>which</code> for anything you're unsure about after adding the
+eval line, rather than assuming.
+</p>
+</div>
+</div>
+<div id="outline-container-org6843aa4" class="outline-2">
+<h2 id="org6843aa4">Why this is worth doing</h2>
+<div class="outline-text-2" id="text-org6843aa4">
+<p>
+Same motivation as the GPG/pass setup: one lightweight mechanism, no
+root, no server, no vendor tie-in — just files under your own home
+directory that you can tar up, move to the next machine, or delete
+without asking anyone's permission.
 </p>
 </div>
 </div>
