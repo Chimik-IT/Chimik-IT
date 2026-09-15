@@ -12,8 +12,6 @@ Since 2022 also building with it: RAG pipelines, LLM integration, AI tooling.
 
 **Also:** [scientific_pdf_loader](https://github.com/Chimik-IT/scientific_pdf_loader), a configurable PDF text/image extractor built as a preprocessing step for LLM and RAG pipelines.
 
-**Writing:** [chimik-it.github.io](https://chimik-it.github.io) — how-tos on infrastructure and tooling.
-
 *Common Lisper by conviction.*
 
 Write-ups and how-tos: [chimik-it.github.io](https://chimik-it.github.io/)
